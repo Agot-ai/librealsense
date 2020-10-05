@@ -16,56 +16,21 @@ from PIL import Image
 
 print('Number of arguments:', len(sys.argv), 'arguments.')
 print('Argument List:', str(sys.argv))
-mc_ip_address = '224.0.0.1'
 port = 1024
 chunk_size = 4096
 #rs.log_to_console(rs.log_severity.debug)
 
-def getDepthAndTimestamp(pipeline):
-    frames = pipeline.wait_for_frames()
-    # take owner ship of the frame for further processing
-    frames.keep()
-    color = frames.get_color_frame()
-    depth = frames.get_depth_frame()
-    if depth and color:
-        #depth2 = depth_filter.process(depth)
-        # take owner ship of the frame for further processing
-        #depth2.keep()
-        # represent the frame as a numpy array
-        color = np.asanyarray(color.as_frame().get_data())
-        depth = np.asanyarray(depth.as_frame().get_data())
-        print(color.shape, color.dtype, color.size)
-        print(depth.shape, depth.dtype, depth.size)
-        ts = frames.get_timestamp()
-        return color, depth, ts
-    else:
-        return None, None, None
-
-def openPipeline():
-    cfg = rs.config()
-    #cfg.enable_stream(stream_type=rs.stream.color, width=1920, height=1080, format=rs.format.yuyv, framerate=30)
-    cfg.enable_stream(stream_type=rs.stream.color, width=1280, height=720, format=rs.format.yuyv, framerate=30)
-    cfg.enable_stream(stream_type=rs.stream.depth, width=1024, height=768, format=rs.format.z16, framerate=30)
-    pipeline = rs.pipeline()
-    pipeline_profile = pipeline.start(cfg)
-    # sensor = pipeline_profile.get_device().first_depth_sensor()
-    return pipeline
-
-class DevNullHandler(asyncore.dispatcher_with_send):
-
-    def handle_read(self):
-        print(self.recv(1024))
-
-    def handle_close(self):
-        self.close()
-           
-                
 class EtherSenseServer(asyncore.dispatcher):
     def __init__(self, address):
         asyncore.dispatcher.__init__(self)
         print("Launching Realsense Camera Server")
         try:
-            self.pipeline = openPipeline()
+            cfg = rs.config()
+            #cfg.enable_stream(stream_type=rs.stream.color, width=1920, height=1080, format=rs.format.yuyv, framerate=30)
+            cfg.enable_stream(stream_type=rs.stream.color, width=1280, height=720, format=rs.format.yuyv, framerate=30)
+            cfg.enable_stream(stream_type=rs.stream.depth, width=1024, height=768, format=rs.format.z16, framerate=30)
+            self.pipeline = rs.pipeline()
+            pipeline_profile = self.pipeline.start(cfg)
         except:
             print("Unexpected error: ", sys.exc_info()[1])
             sys.exit(1)
@@ -87,17 +52,28 @@ class EtherSenseServer(asyncore.dispatcher):
         return True
 
     def update_frame(self):
-        color, depth, timestamp = getDepthAndTimestamp(self.pipeline)
-        if depth is not None:
+        frames = self.pipeline.wait_for_frames()
+        # take owner ship of the frame for further processing
+        frames.keep()
+        color = frames.get_color_frame()
+        depth = frames.get_depth_frame()
+        # represent the frame as a numpy array
+        color = np.asanyarray(color.as_frame().get_data())
+        depth = np.asanyarray(depth.as_frame().get_data())
+        print(color.shape, color.dtype, color.size)
+        print(depth.shape, depth.dtype, depth.size)
+        timestamp = frames.get_timestamp()
+
+        if depth is not None and color is not None:
             # convert the depth image to a string for broadcast
-            data = pickle.dumps(depth) + pickle.dumps(color)
-            print(f"before:{len(data)}")
+            data = pickle.dumps(depth) # + pickle.dumps(color)
+            # print(f"before:{len(data)}")
             #data = zlib.compress(data, 1)
 
             #f = io.BytesIO()
             #Image.frombytes("L", (len(data),1), data).save(f, "png")
             #data = f.getvalue()
-            print(f"after:{len(data)}")
+            # print(f"after:{len(data)}")
             # capture the lenght of the data portion of the message     
             length = struct.pack('<I', len(data))
             # include the current timestamp for the frame
@@ -130,12 +106,11 @@ class EtherSenseServer(asyncore.dispatcher):
             
 
 class MulticastServer(asyncore.dispatcher):
-    def __init__(self, host = mc_ip_address, port=1024):
+    def __init__(self, port=1024):
         asyncore.dispatcher.__init__(self)
-        server_address = ('', port)
         self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.bind(server_address)       
+        self.bind(('', port))
 
     def handle_read(self):
         data, addr = self.socket.recvfrom(42)
