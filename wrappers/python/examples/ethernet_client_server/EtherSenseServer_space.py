@@ -43,8 +43,8 @@ def getDepthAndTimestamp(pipeline):
 
 def openPipeline():
     cfg = rs.config()
-    cfg.enable_stream(stream_type=rs.stream.color, width=1920, height=1080, format=rs.format.yuyv, framerate=30)
-    # cfg.enable_stream(stream_type=rs.stream.color, width=1280, height=720, format=rs.format.yuyv, framerate=30)
+    #cfg.enable_stream(stream_type=rs.stream.color, width=1920, height=1080, format=rs.format.yuyv, framerate=30)
+    cfg.enable_stream(stream_type=rs.stream.color, width=1280, height=720, format=rs.format.yuyv, framerate=30)
     cfg.enable_stream(stream_type=rs.stream.depth, width=1024, height=768, format=rs.format.z16, framerate=30)
     pipeline = rs.pipeline()
     pipeline_profile = pipeline.start(cfg)
