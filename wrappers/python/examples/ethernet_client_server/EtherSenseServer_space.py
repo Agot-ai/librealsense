@@ -9,6 +9,11 @@ import struct
 import cv2
 import time
 
+import zlib
+
+import io
+from PIL import Image
+
 print('Number of arguments:', len(sys.argv), 'arguments.')
 print('Argument List:', str(sys.argv))
 mc_ip_address = '224.0.0.1'
@@ -38,7 +43,8 @@ def getDepthAndTimestamp(pipeline):
 
 def openPipeline():
     cfg = rs.config()
-    cfg.enable_stream(stream_type=rs.stream.color, width=1920, height=1080, format=rs.format.rgb8, framerate=30)
+    cfg.enable_stream(stream_type=rs.stream.color, width=1920, height=1080, format=rs.format.yuyv, framerate=30)
+    # cfg.enable_stream(stream_type=rs.stream.color, width=1280, height=720, format=rs.format.yuyv, framerate=30)
     cfg.enable_stream(stream_type=rs.stream.depth, width=1024, height=768, format=rs.format.z16, framerate=30)
     pipeline = rs.pipeline()
     pipeline_profile = pipeline.start(cfg)
@@ -85,6 +91,13 @@ class EtherSenseServer(asyncore.dispatcher):
         if depth is not None:
             # convert the depth image to a string for broadcast
             data = pickle.dumps(depth) + pickle.dumps(color)
+            print(f"before:{len(data)}")
+            #data = zlib.compress(data, 1)
+
+            #f = io.BytesIO()
+            #Image.frombytes("L", (len(data),1), data).save(f, "png")
+            #data = f.getvalue()
+            print(f"after:{len(data)}")
             # capture the lenght of the data portion of the message     
             length = struct.pack('<I', len(data))
             # include the current timestamp for the frame
