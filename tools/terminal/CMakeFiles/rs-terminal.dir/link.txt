@@ -1,0 +1,1 @@
+/usr/bin/c++   -pedantic -g -Wno-missing-field-initializers -Wno-switch -Wno-multichar -Wsequence-point -Wformat -Wformat-security -mstrict-align -ftree-vectorize -fopenmp    -rdynamic CMakeFiles/rs-terminal.dir/rs-terminal.cpp.o CMakeFiles/rs-terminal.dir/auto-complete.cpp.o  -o rs-terminal  -Wl,-rpath,/home/jetson/librealsense: -lpthread ../../librealsense2.so.2.38.1 

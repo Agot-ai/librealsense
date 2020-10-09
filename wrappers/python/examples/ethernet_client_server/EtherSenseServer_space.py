@@ -63,10 +63,11 @@ class EtherSenseServer(asyncore.dispatcher):
         print(color.shape, color.dtype, color.size)
         print(depth.shape, depth.dtype, depth.size)
         timestamp = frames.get_timestamp()
-
+        print(type(timestamp))
         if depth is not None and color is not None:
             # convert the depth image to a string for broadcast
-            data = pickle.dumps(depth) # + pickle.dumps(color)
+            #data = pickle.dumps(depth) # + pickle.dumps(color)
+            data = pickle.dumps(color)
             # print(f"before:{len(data)}")
             #data = zlib.compress(data, 1)
 

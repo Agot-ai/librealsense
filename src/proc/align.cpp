@@ -10,6 +10,16 @@
 #include "environment.h"
 #include "align.h"
 #include "stream.h"
+#include <mutex>
+
+// typedef struct FrameData {
+//   void *data;         /// frame data
+//   uint32_t bpp;       /// bytes per pixel
+//   std::string title;  /// title of stream
+//   int width;          /// The width in pixels of the stream
+//   int height;         /// The height in pixels of the stream.
+// } FrameData;
+
 
 namespace librealsense
 {
@@ -21,6 +31,7 @@ namespace librealsense
     {
         // Iterate over the pixels of the depth image
 #pragma omp parallel for schedule(dynamic)
+        // #pragma omp parallel for collapse(2)
         for (int depth_y = 0; depth_y < depth_intrin.height; ++depth_y)
         {
             int depth_pixel_index = depth_y * depth_intrin.width;
@@ -59,6 +70,68 @@ namespace librealsense
                 }
             }
         }
+
+//         int orig_width = depth_intrin.width;
+//         int orig_height = depth_intrin.height;
+
+//         int z_scale = 1; // TODO what to set this as?
+//         // uint16_t* data = (uint16_t* )(frame_data.data);
+//         // uint16_t* new_data = (uint16_t* )calloc(depth_intrin.height * depth_intrin.width, frame_data.bpp);
+
+// #ifdef PARALLEL_ALIGNMENT
+//         std::mutex* row_mtxs = new std::mutex[orig_height];
+//         #pragma omp parallel for collapse(2)
+// #endif
+//         for (int orig_y = 0; orig_y < orig_height; orig_y++) {
+//             for (int orig_x = 0; orig_x < orig_width; orig_x++) {
+//                 int orig_idx = orig_y * orig_width + orig_x;
+
+//                 assert (orig_idx < (orig_width * orig_height));
+
+//                 if (float orig = z_scale * get_depth(orig_idx)) {
+//                     float orig_pixel[2] = {orig_x - 0.5f, orig_y - 0.5f};
+//                     float orig_point[3], targ_point[3], targ_pixel[2];
+//                     rs2_deproject_pixel_to_point(orig_point, &depth_intrin, orig_pixel, orig);
+//                     rs2_transform_point_to_point(targ_point, &depth_to_other, orig_point);
+//                     rs2_project_point_to_pixel(targ_pixel, &other_intrin, targ_point);
+
+//                     const int targ_x0 = std::max(0, static_cast<int>(targ_pixel[0] + 0.5f));
+//                     const int targ_y0 = std::max(0, static_cast<int>(targ_pixel[1] + 0.5f));
+
+//                     orig_pixel[0] = orig_x + 0.5f; orig_pixel[1] = orig_y + 0.5f;
+//                     rs2_deproject_pixel_to_point(orig_point, &depth_intrin, orig_pixel, orig);
+//                     rs2_transform_point_to_point(targ_point, &depth_to_other, orig_point);
+//                     rs2_project_point_to_pixel(targ_pixel, &other_intrin, targ_point);
+
+//                     int boundary_width = std::max(0, other_intrin.width);
+//                     int boundary_height = std::max(0, other_intrin.height);
+
+//                     const int targ_x1 = std::min(boundary_width - 1, static_cast<int>(targ_pixel[0] + 0.5f));
+//                     const int targ_y1 = std::min(boundary_height - 1, static_cast<int>(targ_pixel[1] + 0.5f));
+
+//                     // possible make this critical, this code will race if outer loop(s)
+//                     // are parallelized
+//                     // but the performance cost doesn't justify making it critical
+//                     for (int y = targ_y0; y <= targ_y1; ++y) {
+// #ifdef PARALLEL_ALIGNMENT
+//                         row_mtxs[y].lock();
+// #endif
+//                         for (int x = targ_x0; x <= targ_x1; ++x) {
+//                             int targ_idx = y * other_intrin.width + x;
+//                             // std::cout << "align_frame_sample for orig " << orig_x << ", " << orig_y << " from x: " << targ_x0 << " to " << targ_x1 << ", y: " << targ_y0 << " to " << targ_y1 << "\n";
+//                             transfer_pixel(targ_idx, y * other_intrin.width + x);
+//                             transfer_pixel(targ_idx) = transfer_pixel(targ_idx) ?
+//                                 std::min((int)transfer_pixel(targ_idx), (int)get_depth(orig_idx)) :
+//                                 get_depth(orig_idx);
+//                         }
+// #ifdef PARALLEL_ALIGNMENT
+//                         row_mtxs[y].unlock();
+// #endif
+//                     }
+//                 }
+
+//             }
+//         }
     }
 
     align::align(rs2_stream to_stream) : align(to_stream, "Align")
