@@ -10,22 +10,15 @@
 #include <iterator>
 #include <cstddef>
 
-#include "device.h"
-#include "context.h"
-#include "image.h"
-#include "metadata-parser.h"
-
 #include "ds5-timestamp.h"
 #include "ds5-options.h"
-#include "ds5-private.h"
-#include "core/motion.h"
 #include "stream.h"
-#include "environment.h"
 #include "proc/motion-transform.h"
 #include "proc/auto-exposure-processor.h"
 
 #include "../l500/l500-private.h"
 
+using namespace librealsense;
 namespace librealsense
 {
     const std::map<uint32_t, rs2_format> fisheye_fourcc_to_rs2_format = {
@@ -178,6 +171,10 @@ namespace librealsense
                                                                 const std::vector<platform::hid_device_info>& all_hid_infos,
                                                                 const firmware_version& camera_fw_version)
     {
+#ifdef __APPLE__
+        LOG_WARNING("IMU is not avaliable on MAC OS in this version");
+        return nullptr;
+#endif
         if (all_hid_infos.empty())
         {
             LOG_WARNING("No HID info provided, IMU is disabled");
