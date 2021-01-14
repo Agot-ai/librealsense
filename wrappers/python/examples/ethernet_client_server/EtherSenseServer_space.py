@@ -128,7 +128,7 @@ class MulticastServer(asyncore.dispatcher):
 
     def handle_accept(self):
         channel, addr = self.accept()
-        print('received %s bytes from %s' % (data, addr))
+        print('received %s bytes from %s' % (channel, addr))
 
 
 def main(argv):

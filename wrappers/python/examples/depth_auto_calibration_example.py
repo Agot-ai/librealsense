@@ -37,7 +37,7 @@ def main(argv):
 
     while True:
         try:
-            input = raw_input("Please select what the operation you want to do\nc - on chip calibration\nt - tare calibration\ng - get the active calibration\nw - write new calibration\ne - exit\n")
+            input = input("Please select what the operation you want to do\nc - on chip calibration\nt - tare calibration\ng - get the active calibration\nw - write new calibration\ne - exit\n")
 
             if input == 'c':
                 print("Starting on chip calibration")
@@ -47,7 +47,7 @@ def main(argv):
 
             if input == 't':
                 print("Starting tare calibration")
-                ground_truth = float(raw_input("Please enter ground truth in mm\n"))
+                ground_truth = float(input("Please enter ground truth in mm\n"))
                 new_calib, health = calib_dev.run_tare_calibration(ground_truth, 5000, file_cnt, on_chip_calib_cb)
                 print("Calibration completed")
                 print("health factor = ", health)

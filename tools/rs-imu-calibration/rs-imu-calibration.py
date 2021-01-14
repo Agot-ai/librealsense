@@ -38,8 +38,8 @@ elif os.name == 'nt':
 else:
     raise Exception('Unsupported OS: %s' % os.name)
 
-if sys.version_info[0] < 3:
-    input = raw_input
+# if sys.version_info[0] < 3:
+#     input = raw_input
 
 max_float = struct.unpack('f',b'\xff\xff\xff\xff')[0]
 max_int = struct.unpack('i',b'\xff\xff\xff\xff')[0]

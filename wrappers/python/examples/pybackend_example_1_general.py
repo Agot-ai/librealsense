@@ -24,7 +24,7 @@ try:
     backend = rs.create_backend()
     infos = backend.query_uvc_devices()
     print("There are %d connected UVC devices" % len(infos))
-    if len(infos) is 0: exit(1)
+    if len(infos) == 0: exit(1)
     info = infos[2]
     dev = backend.create_uvc_device(info)
 

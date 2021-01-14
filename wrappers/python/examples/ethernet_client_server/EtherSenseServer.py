@@ -22,13 +22,13 @@ def getDepthAndTimestamp(pipeline, depth_filter):
     frames.keep()
     depth = frames.get_depth_frame()
     if depth:
-	depth2 = depth_filter.process(depth)
-	# take owner ship of the frame for further processing
-	depth2.keep()
-	# represent the frame as a numpy array
+        depth2 = depth_filter.process(depth)
+        # take owner ship of the frame for further processing
+        depth2.keep()
+        # represent the frame as a numpy array
         depthData = depth2.as_frame().get_data()        
-	depthMat = np.asanyarray(depthData)
-	ts = frames.get_timestamp()
+        depthMat = np.asanyarray(depthData)
+        ts = frames.get_timestamp()
         return depthMat, ts
     else:
         return None, None
