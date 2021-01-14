@@ -37,31 +37,31 @@ def main(argv):
 
     while True:
         try:
-            input = input("Please select what the operation you want to do\nc - on chip calibration\nt - tare calibration\ng - get the active calibration\nw - write new calibration\ne - exit\n")
+            input_str = input("Please select what the operation you want to do\nc - on chip calibration\nt - tare calibration\ng - get the active calibration\nw - write new calibration\ne - exit\n")
 
-            if input == 'c':
+            if input_str == 'c':
                 print("Starting on chip calibration")
                 new_calib, health = calib_dev.run_on_chip_calibration(5000, file_cnt, on_chip_calib_cb)
                 print("Calibration completed")
                 print("health factor = ", health)
 
-            if input == 't':
+            if input_str == 't':
                 print("Starting tare calibration")
                 ground_truth = float(input("Please enter ground truth in mm\n"))
                 new_calib, health = calib_dev.run_tare_calibration(ground_truth, 5000, file_cnt, on_chip_calib_cb)
                 print("Calibration completed")
                 print("health factor = ", health)
 
-            if input == 'g':
+            if input_str == 'g':
                 calib = calib_dev.get_calibration_table()
                 print("Calibration", calib)
 
-            if input == 'w':
+            if input_str == 'w':
                 print("Writing the new calibration")
                 calib_dev.set_calibration_table(new_calib)
                 calib_dev.write_calibration()
 
-            if input == 'e':
+            if input_str == 'e':
                 pipeline.stop()
                 return
 
